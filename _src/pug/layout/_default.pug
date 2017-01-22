@@ -14,7 +14,8 @@ html(lang="ja")
   body
     div.wrapper
       include ../partials/_nav
-      block ContentBlock
+      div.content.js-content
+        block ContentBlock
     
     block JavascriptBlock
       script(src="./js/script.js")

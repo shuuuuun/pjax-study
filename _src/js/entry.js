@@ -1,9 +1,10 @@
-// import $ from 'jquery';
-// import { EventEmitter2 } from 'eventemitter2';
-// import Util from './modules/Util';
+import Pjax from './modules/Pjax';
 
-// export default class Main extends EventEmitter2 {
-//   constructor(opts = {}) {
-//     super();
-//   }
-// }
+new Pjax({
+  // areas: ['.js-content']
+  area: '.js-content',
+  // link: 'a:not([target])',
+  link: '.js-nav-pjax',
+  ajax: { timeout: 2500 },
+  wait: 500,
+});
