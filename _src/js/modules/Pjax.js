@@ -15,17 +15,30 @@ export default class Pjax {
     this.linkElm.forEach(elm => {
       elm.addEventListener('click', evt => {
         evt.preventDefault();
-        const href = elm.href;
-        this.getPageContent(href).then(body => {
+        const url = elm.href;
+        this.getPageContent(url).then(htmlText => {
           const html = document.createElement('html');
-          html.innerHTML = body;
-          const nextAreaElm = html.querySelector(this.areaSelector);
-          this.areaElm.innerHTML = nextAreaElm.innerHTML;
+          html.innerHTML = htmlText;
+          this.replaceArea(html);
+          this.updateHistory(html, url);
         });
       }, false);
     })
   }
-  
+
+  replaceArea(html) {
+    const nextAreaElm = html.querySelector(this.areaSelector);
+    this.areaElm.innerHTML = nextAreaElm.innerHTML;
+  }
+
+  updateHistory(html, url) {
+    const state = {};
+    const title = html.querySelector('title').textContent;
+
+    history.pushState(state, title, url);
+    document.querySelector('title').textContent = title; // 現状はpushStateでtitle変わらないらしいので
+  }
+
   getPageContent(url) {
     console.log('fetch: ', url);
     const promise = fetch(url).then(res => res.text());
