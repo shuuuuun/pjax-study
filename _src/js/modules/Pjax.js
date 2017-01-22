@@ -29,6 +29,7 @@ export default class Pjax {
   replaceArea(html) {
     const nextAreaElm = html.querySelector(this.areaSelector);
     this.areaElm.innerHTML = nextAreaElm.innerHTML;
+    // TODO: 要素ごとまるっと置き換えたほうがいいかも
   }
 
   updateHistory(html, url) {
