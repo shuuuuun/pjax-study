@@ -41,7 +41,8 @@
     "reset-css": "latest",
     "vinyl-buffer": "latest",
     "vinyl-source-stream": "latest",
-    "watchify": "latest"
+    "watchify": "latest",
+    "whatwg-fetch": "^2.0.2"
   },
   "babel": {
     "presets": [
