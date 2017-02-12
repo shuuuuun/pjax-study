@@ -21,6 +21,7 @@
     "babelify": "latest",
     "browserify": "latest",
     "dotenv": "latest",
+    "eventemitter2": "^3.0.0",
     "gulp": "latest",
     "gulp-eslint": "latest",
     "gulp-if": "latest",
