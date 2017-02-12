@@ -1,14 +1,17 @@
 import 'whatwg-fetch';
+import EventEmitter from 'eventemitter2';
 
-export default class Pjax {
+export default class Pjax extends EventEmitter {
   constructor(opts = {}) {
+    super();
+
     this.areaSelector = opts.area || 'body';
     this.areaElm = document.querySelector(this.areaSelector);
     this.linkElm = document.querySelectorAll(opts.link || 'a');
-    this.ajaxOpts = opts.ajax || {};
-    this.ajaxWait = opts.wait || 0;
+    this.wait = opts.wait || 0;
 
     this.initLinkClickEvent();
+    this.initPopStateEvent();
   }
 
   initLinkClickEvent() {
@@ -16,23 +19,36 @@ export default class Pjax {
       elm.addEventListener('click', evt => {
         evt.preventDefault();
         const url = elm.href;
-        this.getPageContent(url).then(htmlText => {
-          const html = document.createElement('html');
-          html.innerHTML = htmlText;
+        if (url === document.location.href) return false;
+        this.fetchPageContent(url).then(html => {
           this.replaceArea(html);
-          this.updateHistory(html, url);
+          this.pushHistory(html, url);
         });
       }, false);
     })
   }
 
-  replaceArea(html) {
-    const nextAreaElm = html.querySelector(this.areaSelector);
-    this.areaElm.innerHTML = nextAreaElm.innerHTML;
-    // TODO: 要素ごとまるっと置き換えたほうがいいかも
+  initPopStateEvent() {
+    window.addEventListener('popstate', evt => {
+      const url = document.location.href;
+      this.fetchPageContent(url).then(html => {
+        this.replaceArea(html);
+      });
+    });
   }
 
-  updateHistory(html, url) {
+  replaceArea(html) {
+    const nextAreaElm = html.querySelector(this.areaSelector);
+    const parentNode = this.areaElm.parentNode;
+    this.emit('pjax:replaceStart', this.areaElm, nextAreaElm);
+    setTimeout(() => {
+      parentNode.replaceChild(nextAreaElm, this.areaElm);
+      this.areaElm = nextAreaElm;
+      this.emit('pjax:replaceEnd', this.areaElm);
+    }, this.wait);
+  }
+
+  pushHistory(html, url) {
     const state = {};
     const title = html.querySelector('title').textContent;
 
@@ -40,9 +56,17 @@ export default class Pjax {
     document.querySelector('title').textContent = title; // 現状はpushStateでtitle変わらないらしいので
   }
 
-  getPageContent(url) {
+  fetchPageContent(url) {
     console.log('fetch: ', url);
-    const promise = fetch(url).then(res => res.text());
+    const promise = fetch(url)
+      .then(res => res.text())
+      .then(htmlText => {
+        const html = document.createElement('html');
+        html.innerHTML = htmlText;
+
+        this.emit('pjax:complete');
+        return html;
+      });
     return promise;
   }
 }
